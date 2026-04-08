@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>离职厂牌制作助手</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">L</div>
+          <div>
+            <p class="brand-title">离职厂牌制作助手</p>
+            <p class="brand-subtitle">选择图片，微调人物，直接导出</p>
+          </div>
+        </div>
+
+        <section class="panel panel-accent">
+          <div class="button-stack">
+            <input type="file" accept="image/png,image/jpeg,image/webp" hidden data-input="image-file" />
+            <button type="button" class="primary-button" data-action="choose-image">选择人物图</button>
+            <button type="button" class="secondary-button" data-action="export">导出 PNG</button>
+          </div>
+        </section>
+
+        <section class="panel compact-panel">
+          <span class="info-label">当前图片</span>
+          <p class="path-text" data-field="image-name">尚未选择图片</p>
+        </section>
+
+        <section class="panel">
+          <label class="field">
+            <span>姓名</span>
+            <input type="text" data-input="name" placeholder="自动从文件名推断" />
+          </label>
+          <div class="two-column">
+            <label class="field">
+              <span>入职日期</span>
+              <input type="date" data-input="join-date" />
+            </label>
+            <label class="field field-readonly">
+              <span>在职天数</span>
+              <div class="readonly-value" data-field="days">-</div>
+            </label>
+          </div>
+          <label class="field">
+            <span>输出文件名</span>
+            <input type="text" data-input="output-name" placeholder="默认自动生成 PNG 文件名" />
+          </label>
+        </section>
+
+        <section class="panel">
+          <div class="three-column">
+            <label class="field">
+              <span>缩放</span>
+              <input type="number" step="0.05" min="0.3" max="2.5" value="1" data-input="scale" />
+            </label>
+            <label class="field">
+              <span>X</span>
+              <input type="number" step="1" min="-200" max="200" value="0" data-input="x-offset" />
+            </label>
+            <label class="field">
+              <span>Y</span>
+              <input type="number" step="1" min="-200" max="200" value="0" data-input="y-offset" />
+            </label>
+          </div>
+        </section>
+      </aside>
+
+      <main class="preview-page">
+        <header class="preview-header">
+          <div>
+            <p class="eyebrow">Badge Preview</p>
+            <h1>离职厂牌预览</h1>
+          </div>
+          <div class="status-chip" data-preview-status data-kind="info">初始化中...</div>
+        </header>
+
+        <section class="preview-stage is-empty" data-preview-stage>
+          <div class="preview-glow"></div>
+          <div class="lanyard-ribbon" data-lanyard></div>
+          <div class="badge-card" data-preview-card>
+            <div class="badge-surface">
+              <canvas width="319" height="508" data-canvas="preview"></canvas>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./renderer.js"></script>
+  </body>
+</html>

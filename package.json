@@ -1,0 +1,31 @@
+{
+  "name": "li-zhi-badge-maker-electron",
+  "version": "2.0.0",
+  "description": "Electron rebuild of the badge maker with LUNA-Badge-inspired preview experience.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build:win": "electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.lizhi.badgemaker",
+    "productName": "Li Zhi Badge Maker",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  }
+}
