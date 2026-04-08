@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "records": [
+    {
+      "image_path": "examples/input_images/冯兵.png",
+      "name": "冯兵",
+      "days": "1193",
+      "headline": "和奥马一起走过1193天",
+      "subheadline": "感恩有您  前程似锦",
+      "output_name": "01 冯兵-离职厂牌-.png",
+      "scale_adjust": 1.0,
+      "x_offset": 0,
+      "y_offset": 0
+    }
+  ]
+}
+

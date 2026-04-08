@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lizhi-badge-maker"
+version = "1.0.0"
+description = "离职厂牌制作助手：批量导入人物图片并生成离职厂牌"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "Pillow>=10.4.0",
+  "PySide6>=6.7.0",
+]
+
+[project.scripts]
+lizhi-badge-maker = "li_zhi_badge_maker.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
