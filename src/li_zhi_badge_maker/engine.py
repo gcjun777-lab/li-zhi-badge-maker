@@ -5,15 +5,17 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .models import BadgeRecord, build_headline
+from .models import BadgeRecord, DEFAULT_SUBHEADLINE, build_headline
 from .resources import DEFAULT_FONT, LOWER_TEMPLATE, UPPER_TEMPLATE, ensure_assets_exist, resolve_path
 
 
 CANVAS_WIDTH = 319
-CANVAS_HEIGHT = 413
-PERSON_BOX = (34, 18, 285, 252)
+CANVAS_HEIGHT = 508
+# Derived from the full SVG template geometry so the portrait sits lower and larger,
+# matching the provided reference badge instead of the compressed preview layout.
+PERSON_BOX = (44, 22, 275, 344)
 TEXT_COLOR = (255, 255, 255, 255)
-UPPER_OFFSET_Y = CANVAS_HEIGHT - 296
+UPPER_OFFSET_Y = 212
 
 
 @dataclass(frozen=True)
@@ -24,11 +26,13 @@ class TextBlock:
     right: int = CANVAS_WIDTH - 24
     font_size: int = 32
     min_font_size: int = 14
+    letter_spacing: int = 0
+    space_extra: int = 0
 
 
-NAME_BLOCK = TextBlock(top=245, height=58, font_size=42, min_font_size=22)
-HEADLINE_BLOCK = TextBlock(top=314, height=30, font_size=22, min_font_size=12)
-SUBHEADLINE_BLOCK = TextBlock(top=350, height=24, font_size=16, min_font_size=10)
+NAME_BLOCK = TextBlock(top=299, height=72, font_size=42, min_font_size=22, letter_spacing=2)
+HEADLINE_BLOCK = TextBlock(top=386, height=34, font_size=22, min_font_size=12, letter_spacing=3)
+SUBHEADLINE_BLOCK = TextBlock(top=428, height=26, font_size=16, min_font_size=10, letter_spacing=2, space_extra=2)
 
 
 def _open_rgba(path: Path) -> Image.Image:
@@ -42,28 +46,87 @@ def _get_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
         return ImageFont.load_default()
 
 
-def _fit_font(text: str, max_width: int, start_size: int, min_size: int) -> ImageFont.ImageFont:
+def _fit_font(
+    text: str,
+    max_width: int,
+    start_size: int,
+    min_size: int,
+    letter_spacing: int = 0,
+) -> ImageFont.ImageFont:
     if not text:
         return _get_font(min_size)
     for size in range(start_size, min_size - 1, -1):
         font = _get_font(size)
-        left, _, right, _ = font.getbbox(text)
-        if right - left <= max_width:
+        text_width, _ = _measure_text(text, font, letter_spacing)
+        if text_width <= max_width:
             return font
     return _get_font(min_size)
+
+
+def _measure_text(
+    text: str,
+    font: ImageFont.ImageFont,
+    letter_spacing: int = 0,
+    space_extra: int = 0,
+) -> tuple[int, int]:
+    if not text:
+        return 0, 0
+    if letter_spacing <= 0:
+        left, top, right, bottom = font.getbbox(text)
+        return right - left, bottom - top
+
+    widths = []
+    heights = []
+    for char in text:
+        left, top, right, bottom = font.getbbox(char)
+        char_width = right - left
+        if char == " ":
+            char_width += space_extra
+        widths.append(char_width)
+        heights.append(bottom - top)
+    total_width = sum(widths) + letter_spacing * max(len(text) - 1, 0)
+    return total_width, max(heights, default=0)
+
+
+def _draw_spaced_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x: int,
+    y: int,
+    font: ImageFont.ImageFont,
+    fill: tuple[int, int, int, int],
+    letter_spacing: int,
+    space_extra: int,
+) -> None:
+    if letter_spacing <= 0:
+        draw.text((x, y), text, fill=fill, font=font)
+        return
+
+    cursor_x = x
+    for char in text:
+        draw.text((cursor_x, y), char, fill=fill, font=font)
+        left, _, right, _ = font.getbbox(char)
+        char_width = right - left
+        if char == " ":
+            char_width += space_extra
+        cursor_x += char_width + letter_spacing
 
 
 def _center_text(draw: ImageDraw.ImageDraw, text: str, block: TextBlock) -> None:
     if not text:
         return
     width = block.right - block.left
-    font = _fit_font(text, width, block.font_size, block.min_font_size)
-    left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
-    text_width = right - left
-    text_height = bottom - top
+    font = _fit_font(
+        text,
+        width,
+        block.font_size,
+        block.min_font_size,
+        block.letter_spacing,
+    )
+    text_width, text_height = _measure_text(text, font, block.letter_spacing, block.space_extra)
     x = block.left + max((width - text_width) // 2, 0)
     y = block.top + max((block.height - text_height) // 2, 0)
-    draw.text((x, y), text, fill=TEXT_COLOR, font=font)
+    _draw_spaced_text(draw, text, x, y, font, TEXT_COLOR, block.letter_spacing, block.space_extra)
 
 
 def _person_layer(record: BadgeRecord) -> Image.Image:
@@ -101,10 +164,10 @@ def render_badge(record: BadgeRecord) -> Image.Image:
     canvas.alpha_composite(upper, (0, UPPER_OFFSET_Y))
 
     draw = ImageDraw.Draw(canvas)
-    headline = record.headline or build_headline(record.days)
+    headline = build_headline(record.days)
     _center_text(draw, record.name, NAME_BLOCK)
     _center_text(draw, headline, HEADLINE_BLOCK)
-    _center_text(draw, record.subheadline, SUBHEADLINE_BLOCK)
+    _center_text(draw, DEFAULT_SUBHEADLINE, SUBHEADLINE_BLOCK)
     return canvas
 
 
@@ -115,4 +178,3 @@ def export_badge(record: BadgeRecord, output_dir: str | Path) -> Path:
     target_path = output_root / record.output_name
     image.save(target_path)
     return target_path
-

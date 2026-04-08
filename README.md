@@ -39,6 +39,25 @@ pip install -e .
 python -m li_zhi_badge_maker
 ```
 
+如果你希望直接使用本地工作流，不想手敲安装命令，可以用这三条脚本：
+
+```bash
+./scripts/setup_local.sh
+./scripts/run_gui.sh
+./scripts/export_sample.sh
+```
+
+说明：
+
+- `setup_local.sh`：创建 `.venv` 并安装依赖
+- `run_gui.sh`：启动图形界面
+- `export_sample.sh`：用示例工程直接导出一张图片，方便确认环境没问题
+
+如果你更习惯双击运行，也可以直接使用项目根目录里的：
+
+- `初始化环境.command`
+- `启动离职厂牌制作助手.command`
+
 如果你只是想验证渲染逻辑，也可以直接运行：
 
 ```bash

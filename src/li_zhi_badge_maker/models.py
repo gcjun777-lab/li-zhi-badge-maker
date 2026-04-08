@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from datetime import date
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 
 
@@ -19,13 +20,25 @@ def build_headline(days: str | int) -> str:
     return f"和奥马一起走过{days}天"
 
 
+def calculate_days_from_join_date(join_date: str, today: date | None = None) -> str:
+    if not join_date:
+        return ""
+    current_day = today or date.today()
+    try:
+        start_day = date.fromisoformat(join_date)
+    except ValueError:
+        return ""
+    if start_day > current_day:
+        return "0"
+    return str((current_day - start_day).days)
+
+
 @dataclass
 class BadgeRecord:
     image_path: str
     name: str
+    join_date: str = ""
     days: str = ""
-    headline: str = ""
-    subheadline: str = DEFAULT_SUBHEADLINE
     output_name: str = ""
     scale_adjust: float = 1.0
     x_offset: int = 0
@@ -34,18 +47,18 @@ class BadgeRecord:
     def ensure_defaults(self, index: int | None = None) -> None:
         if not self.name:
             self.name = infer_name_from_path(self.image_path)
-        if not self.headline:
-            self.headline = build_headline(self.days or "")
+        if not self.days and self.join_date:
+            self.days = calculate_days_from_join_date(self.join_date)
         if not self.output_name:
-            prefix = f"{index + 1:02d} " if index is not None else ""
-            self.output_name = f"{prefix}{self.name}-离职厂牌-.png"
+            self.output_name = f"{self.name}-离职厂牌-.png"
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict) -> "BadgeRecord":
-        record = cls(**data)
+        valid_names = {field.name for field in fields(cls)}
+        filtered = {key: value for key, value in data.items() if key in valid_names}
+        record = cls(**filtered)
         record.ensure_defaults()
         return record
-

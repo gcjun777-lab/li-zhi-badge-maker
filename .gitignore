@@ -1,4 +1,5 @@
 __pycache__/
+.DS_Store
 *.py[cod]
 *.spec
 .pytest_cache/
@@ -10,4 +11,4 @@ dist/
 release/
 *.egg-info/
 examples/output/generated/
-
+examples/output/generated-local/

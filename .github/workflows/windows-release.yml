@@ -41,7 +41,7 @@ jobs:
       - name: Build EXE
         run: >
           pyinstaller --noconfirm --clean --windowed
-          --name "离职厂牌制作助手"
+          --name "li-zhi-badge-maker"
           --paths src
           --add-data "assets;assets"
           src/li_zhi_badge_maker/main.py
@@ -50,7 +50,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path release | Out-Null
-          Compress-Archive -Path "dist/离职厂牌制作助手/*" -DestinationPath "release/离职厂牌制作助手-win64.zip" -Force
+          Compress-Archive -Path "dist/li-zhi-badge-maker/*" -DestinationPath "release/li-zhi-badge-maker-win64.zip" -Force
           Compress-Archive -Path "examples/*" -DestinationPath "release/examples.zip" -Force
 
       - name: Publish release
@@ -61,4 +61,3 @@ jobs:
           artifacts: "release/*.zip"
           artifactErrorsFailBuild: true
           generateReleaseNotes: true
-

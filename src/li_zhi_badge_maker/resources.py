@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
-PROJECT_ROOT = PACKAGE_ROOT.parent.parent
+
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    PROJECT_ROOT = Path(sys._MEIPASS)
+else:
+    PROJECT_ROOT = PACKAGE_ROOT.parent.parent
+
 ASSETS_DIR = PROJECT_ROOT / "assets"
 TEMPLATES_DIR = ASSETS_DIR / "templates"
 FONTS_DIR = ASSETS_DIR / "fonts"
@@ -26,4 +32,3 @@ def ensure_assets_exist() -> None:
     if missing:
         joined = ", ".join(str(path) for path in missing)
         raise FileNotFoundError(f"缺少必要资源文件: {joined}")
-
